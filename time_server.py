@@ -78,7 +78,7 @@ notify_methods = {
 def index(type=None):
     if type not in client_type:
         type = client_type[0]
-    return render_template('{0}.html'.format(type))
+    return render_template('time_client_{0}.html'.format(type))
 
 
 @app.route('/update')
