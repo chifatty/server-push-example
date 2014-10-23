@@ -11,8 +11,6 @@
         <script type="text/javascript"> 
 
             var min = {{timestamp}};
-            var waiting_for_update = false;
-
 
             function load_data() {
                 var chatroom = document.getElementById('chatroom');
@@ -26,29 +24,23 @@
                 xhr.send();
             }
 
-            function wait_for_update() {
-                if (!waiting_for_update) {
-                    waiting_for_update = true;
-                    xhr = new XMLHttpRequest();
-                    xhr.timeout = 60000;
-                    xhr.open('GET', '/notify/lpolling', true);
-                    xhr.onload = function() {
-                        load_data();
-                        waiting_for_update = false;
-                        console.log(this.responseText);
-                        wait_for_update();
-                    }
-                    xhr.onerror = function() {
-                        waiting_for_update = false;
-                        console.log("Connection colosed. Retry after 10s"); 
-                        setTimeout(function() { wait_for_update();}, 10000);
-                    }
-                    xhr.cancel = function() {
-                        waiting_for_update = false;
-                        console.log("Connection colosed. Retry after 10s"); 
-                        setTimeout(function() { wait_for_update();}, 10000);
-                    }
-                    xhr.send();
+            // Establish websocket connection
+            function establish_websocket() {
+                if ("WebSocket" in window) {                                         
+                    ws = new WebSocket("ws://" + document.domain + ":5002" + "/notify/ws");
+                    ws.onstart = function() {
+                    };
+                    ws.onmessage = function (msg) {
+                        load_data();                     
+                    };
+                    ws.onclose = function (msg) {
+                        console.log("Connection colosed. Retry after 10s");
+                        setTimeout(function() {establish_websocket()}, 10000);
+                    };
+                    // load the initial data 
+                    load_data();
+                } else {                                                             
+                    console("WebSocket not supported");                                
                 }
             }
 
@@ -67,12 +59,13 @@
                     words.value = ''
                 }
             }
+
             (function() {
                 var words = document.getElementById('words');
                 words.onkeypress = function(e) { if (e.keyCode == 13) send_data();} 
                 
                 load_data();
-                wait_for_update();
+                establish_websocket();
             })();
 
         </script>

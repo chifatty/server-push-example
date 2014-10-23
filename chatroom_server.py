@@ -1,4 +1,4 @@
-import ast
+import json
 import time
 
 import gevent
@@ -12,6 +12,7 @@ from gevent import monkey
 from gevent.event import Event
 from gevent.wsgi import WSGIServer
 from geventwebsocket.handler import WebSocketHandler  # For websocket
+from werkzeug.serving import run_with_reloader
 
 app = Flask(__name__)
 app.event = Event()
@@ -51,7 +52,7 @@ def sse_notify():
     def ready():
         try:
             while True:
-                gevent.sleep(3)
+                app.event.wait()
                 ev = ServerSentEvent(str('ready'))
                 yield ev.encode()
         except GeneratorExit:
@@ -64,7 +65,7 @@ def ws_notify():
     ws = request.environ.get('wsgi.websocket', None)
     if ws:
         while True:
-            gevent.sleep(3)
+            app.event.wait()
             ws.send('ready')
     else:
         raise RuntimeError("Environment lacks WSGI WebSocket support")
@@ -89,11 +90,11 @@ def index(type=None):
 @app.route('/publish', methods=['POST'])
 def publish():
     r = redis.Redis(connection_pool=redis_pool)
-    d = {
+    d = json.dumps({
         'name': request.form.get('name', 'anonymous'),
         'words': request.form.get('words', ''),
         'timestamp': time.time()
-    }
+    })
     r.zadd('chats', d, time.time())
     app.event.set()
     app.event.clear()
@@ -102,7 +103,6 @@ def publish():
 
 @app.route('/update/<timestamp>')
 def update(timestamp):
-    print timestamp
     try:
         min = float(timestamp)
     except ValueError:
@@ -113,7 +113,7 @@ def update(timestamp):
     timestamp = time.time()
     update_string = ''
     for chat in chats:
-        chat = ast.literal_eval(chat)
+        chat = json.loads(chat)
         time_string = time.strftime('%a, %d %b %Y %H:%M:%S %Z',
                                     time.localtime(float(chat['timestamp'])))
         update_string += '{0}@{1}\n\t{2}\n'.format(
@@ -131,8 +131,12 @@ def notity(type=None):
     return notify_methods[type]()
 
 
-if __name__ == "__main__":
+@run_with_reloader
+def run_server():
     app.debug = True
-    #  server = WSGIServer(("", 5001), app)
     server = WSGIServer(("", 5002), app, handler_class=WebSocketHandler)
     server.serve_forever()
+
+
+if __name__ == "__main__":
+    run_server()
