@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <div id="content"></div>
+        <script type="text/javascript"> 
+
+            function load_data() {
+                var content = document.getElementById('content');
+                xhr = new XMLHttpRequest(); 
+                xhr.open('GET', '/update', false);
+                xhr.onload = function() {
+                    content.innerHTML = this.responseText;
+                };
+                xhr.send();
+            }
+
+            // Establish websocket connection
+            function establish_websocket() {
+                if ("WebSocket" in window) {                                         
+                    ws = new WebSocket("ws://" + document.domain + ":5001" + "/notify/ws");
+                    ws.onstart = function() {
+                    };
+                    ws.onmessage = function (msg) {
+                        load_data();                     
+                    };
+                    ws.onclose = function (msg) {
+                    };
+                    // load the initial data 
+                    load_data();
+                } else {                                                             
+                    console("WebSocket not supported");                                
+                }
+            }
+            // load inital data
+            load_data();
+            establish_websocket();
+
+        </script>
+    </body>
+</html>

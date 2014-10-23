@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <div id="content"></div>
+        <script type="text/javascript"> 
+
+            function load_data() {
+                var content = document.getElementById('content');
+                xhr = new XMLHttpRequest(); 
+                xhr.open('GET', '/update', false);
+                xhr.onload = function() {
+                    content.innerHTML = this.responseText;
+                };
+                xhr.send();
+            }
+
+            // Register server event
+            var sse = new EventSource('/notify/sse')
+            sse.onmessage = function(e) {
+                console.log(e.data);
+                load_data();
+            };
+            // load inital data
+            load_data();
+
+        </script>
+    </body>
+</html>
