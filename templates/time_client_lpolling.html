@@ -23,7 +23,7 @@
                     waiting_for_update = true;
                     xhr = new XMLHttpRequest();
                     xhr.timeout = 60000;
-                    xhr.open('GET', '/notify/lpolling', true);
+                    xhr.open('POST', '/notify/lpolling', true);
                     xhr.onload = function() {
                         load_data();
                         waiting_for_update = false;
