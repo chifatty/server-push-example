@@ -33,15 +33,18 @@ class ServerSentEvent(object):
         return "%s\n\n" % "\n".join(lines)
 
 
+@app.route('/polling_notify')
 def polling_notify():
     return 'ready'
 
 
+@app.route('/lpolling_notify', methods=['POST'])
 def lpolling_notify():
     gevent.sleep(3)
     return 'ready'
 
 
+@app.route('/sse_notify')
 def sse_notify():
     def ready():
         try:
@@ -55,6 +58,7 @@ def sse_notify():
     return Response(ready(), mimetype="text/event-stream")
 
 
+@app.route('/ws_notify')
 def ws_notify():
     ws = request.environ.get('wsgi.websocket', None)
     if ws:
@@ -63,14 +67,6 @@ def ws_notify():
             ws.send('ready')
     else:
         raise RuntimeError("Environment lacks WSGI WebSocket support")
-
-
-notify_methods = {
-    'polling': polling_notify,
-    'lpolling': lpolling_notify,
-    'sse': sse_notify,
-    'ws': ws_notify
-    }
 
 
 @app.route('/')
@@ -84,15 +80,6 @@ def index(type=None):
 @app.route('/update')
 def update():
     return time.strftime('%a, %d %b %Y %H:%M:%S %Z')
-
-
-@app.route('/notify')
-@app.route('/notify/<type>')
-def notity(type=None):
-    if type not in client_type:
-        type = client_type[0]
-    return notify_methods[type]()
-
 
 if __name__ == "__main__":
     app.debug = True

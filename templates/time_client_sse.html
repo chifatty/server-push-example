@@ -17,7 +17,7 @@
             }
 
             // Register server event
-            var sse = new EventSource('/notify/sse')
+            var sse = new EventSource('/sse_notify')
             sse.onmessage = function(e) {
                 console.log(e.data);
                 load_data();
