@@ -43,7 +43,7 @@ class ServerSentEvent(object):
         return "%s\n\n" % "\n".join(lines)
 
 
-@app.route('/lpolling_notify', methods=['POST'])
+@app.route('/lpolling_notify')
 def lpolling_notify():
     app.event.wait()
     return 'ready'
@@ -122,7 +122,7 @@ def update(timestamp):
 @run_with_reloader
 def run_server():
     app.debug = True
-    server = WSGIServer(("", 5002), app, handler_class=WebSocketHandler)
+    server = WSGIServer(("", 5003), app, handler_class=WebSocketHandler)
     server.serve_forever()
 
 
