@@ -19,7 +19,8 @@
                 xhr.onload = function() {
                     response = JSON.parse(this.responseText);
                     min = response.timestamp;
-                    chatroom.innerHTML = response.data + chatroom.innerHTML;
+                    chatroom.innerHTML += response.data;
+                    chatroom.scrollTop = chatroom.scrollHeight;
                 };
                 xhr.send();
             }
@@ -27,7 +28,7 @@
             // Establish websocket connection
             function establish_websocket() {
                 if ("WebSocket" in window) {                                         
-                    ws = new WebSocket("ws://" + document.domain + ":5002" + "/notify/ws");
+                    ws = new WebSocket("ws://" + document.domain + ":5002" + "/ws_notify");
                     ws.onstart = function() {
                     };
                     ws.onmessage = function (msg) {

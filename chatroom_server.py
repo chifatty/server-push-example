@@ -1,10 +1,10 @@
 import json
 import time
 
-import gevent
 import redis
 from flask import Flask
 from flask import jsonify
+from flask import make_response
 from flask import render_template
 from flask import request
 from flask import Response
@@ -43,11 +43,13 @@ class ServerSentEvent(object):
         return "%s\n\n" % "\n".join(lines)
 
 
+@app.route('/lpolling_notify', methods=['POST'])
 def lpolling_notify():
     app.event.wait()
     return 'ready'
 
 
+@app.route('/sse_notify')
 def sse_notify():
     def ready():
         try:
@@ -61,6 +63,7 @@ def sse_notify():
     return Response(ready(), mimetype="text/event-stream")
 
 
+@app.route('/ws_notify')
 def ws_notify():
     ws = request.environ.get('wsgi.websocket', None)
     if ws:
@@ -69,13 +72,6 @@ def ws_notify():
             ws.send('ready')
     else:
         raise RuntimeError("Environment lacks WSGI WebSocket support")
-
-
-notify_methods = {
-    'lpolling': lpolling_notify,
-    'sse': sse_notify,
-    'ws': ws_notify
-    }
 
 
 @app.route('/')
@@ -109,7 +105,7 @@ def update(timestamp):
         min = -float('inf')
 
     r = redis.Redis(connection_pool=redis_pool)
-    chats = r.zrevrangebyscore('chats', float('inf'), min)
+    chats = r.zrangebyscore('chats', min, float('inf'))
     timestamp = time.time()
     update_string = ''
     for chat in chats:
@@ -121,15 +117,6 @@ def update(timestamp):
             time_string,
             chat['words'].encode('utf-8'))
     return jsonify({'timestamp': timestamp, 'data': update_string})
-
-
-@app.route('/notify')
-@app.route('/notify/<type>')
-def notity(type=None):
-    if type not in client_type:
-        type = client_type[0]
-    return notify_methods[type]()
-
 
 @run_with_reloader
 def run_server():

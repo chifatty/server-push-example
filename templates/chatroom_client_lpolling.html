@@ -17,11 +17,12 @@
             function load_data() {
                 var chatroom = document.getElementById('chatroom');
                 xhr = new XMLHttpRequest(); 
-                xhr.open('GET', '/update/' + min, false);
+                xhr.open('POST', '/update/' + min, false);
                 xhr.onload = function() {
                     response = JSON.parse(this.responseText);
                     min = response.timestamp;
-                    chatroom.innerHTML = response.data + chatroom.innerHTML;
+                    chatroom.innerHTML += response.data;
+                    chatroom.scrollTop = chatroom.scrollHeight;
                 };
                 xhr.send();
             }
@@ -31,7 +32,8 @@
                     waiting_for_update = true;
                     xhr = new XMLHttpRequest();
                     xhr.timeout = 60000;
-                    xhr.open('POST', '/notify/lpolling', true);
+                    // xhr.open('GET', '/notify/lpolling', true);
+                    xhr.open('GET', '/lpolling_notify', true);
                     xhr.onload = function() {
                         load_data();
                         waiting_for_update = false;
