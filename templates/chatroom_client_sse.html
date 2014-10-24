@@ -5,14 +5,12 @@
     <body>
         <div id="container">
             <textarea disabled id="chatroom" style="height:300px; max-height:300px; width:600px"></textarea><br />
-            <input id="name" style="width:130px" value="lpolling" />
+            <input id="name" style="width:130px" value="sse" />
             <input id="words" style="width:460px" />
         </div>
         <script type="text/javascript"> 
 
             var min = {{timestamp}};
-            var waiting_for_update = false;
-
 
             function load_data() {
                 var chatroom = document.getElementById('chatroom');
@@ -25,33 +23,6 @@
                     chatroom.scrollTop = chatroom.scrollHeight;
                 };
                 xhr.send();
-            }
-
-            function wait_for_update() {
-                if (!waiting_for_update) {
-                    waiting_for_update = true;
-                    xhr = new XMLHttpRequest();
-                    xhr.timeout = 60000;
-                    // xhr.open('GET', '/notify/lpolling', true);
-                    xhr.open('POST', '/lpolling_notify', true);
-                    xhr.onload = function() {
-                        load_data();
-                        waiting_for_update = false;
-                        console.log(this.responseText);
-                        setTimeout(function() { wait_for_update();}, 50);
-                    }
-                    xhr.onerror = function() {
-                        waiting_for_update = false;
-                        console.log("Connection colosed. Retry after 10s"); 
-                        setTimeout(function() { wait_for_update();}, 10000);
-                    }
-                    xhr.cancel = function() {
-                        waiting_for_update = false;
-                        console.log("Connection colosed. Retry after 10s"); 
-                        setTimeout(function() { wait_for_update();}, 10000);
-                    }
-                    xhr.send();
-                }
             }
 
             function send_data() {
@@ -69,12 +40,19 @@
                     words.value = ''
                 }
             }
+
             (function() {
                 var words = document.getElementById('words');
                 words.onkeypress = function(e) { if (e.keyCode == 13) send_data();} 
                 
                 load_data();
-                wait_for_update();
+                
+                // Register server event
+                var sse = new EventSource('/sse_notify')
+                sse.onmessage = function(e) {
+                    load_data();
+                };
+
             })();
 
         </script>

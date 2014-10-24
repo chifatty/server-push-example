@@ -17,7 +17,7 @@ from werkzeug.serving import run_with_reloader
 app = Flask(__name__)
 app.event = Event()
 monkey.patch_all()
-client_type = ['lpolling', 'sse', 'ws']
+client_type = ['polling', 'lpolling', 'sse', 'ws']
 redis_pool = redis.ConnectionPool()
 
 
