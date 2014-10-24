@@ -12,6 +12,6 @@ Demo the implementation of server push in flask framework
 * Websocket: 
   * Jonathan Eunice [flask-ws-example](https://bitbucket.org/jeunice/flask-ws-example)
 * Sever Sent Event: 
-  *   Oskar Blom [Realtime server using the SSE protocol](http://flask.pocoo.org/snippets/116/)
+  *   Oskar Blom [Realtime Server Using The SSE Protocol](http://flask.pocoo.org/snippets/116/)
   *   Eric Bidelman [Stream Updates with Server-Sent Events](http://www.html5rocks.com/en/tutorials/eventsource/basics/)
-  *   Mozilla Developer Network [Using server-sent events](https://developer.mozilla.org/en-US/docs/Server-sent_events/Using_server-sent_events)
+  *   Mozilla Developer Network [Using Server-Sent Events](https://developer.mozilla.org/en-US/docs/Server-sent_events/Using_server-sent_events)
