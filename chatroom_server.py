@@ -110,13 +110,14 @@ def update(timestamp):
     update_string = ''
     for chat in chats:
         chat = json.loads(chat)
-        time_string = time.strftime('%a, %d %b %Y %H:%M:%S %Z',
+        time_string = time.strftime('%H:%M:%S %Z',
                                     time.localtime(float(chat['timestamp'])))
-        update_string += '{0}@{1}\n\t{2}\n'.format(
-            chat['name'].encode('utf-8'),
+        update_string += '[{0}]  {1:10}  said: {2}\n'.format(
             time_string,
+            chat['name'].encode('utf-8'),
             chat['words'].encode('utf-8'))
     return jsonify({'timestamp': timestamp, 'data': update_string})
+
 
 @run_with_reloader
 def run_server():
