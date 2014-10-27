@@ -1,10 +1,10 @@
 server-push-example
 ===================
 
-Demo the implementation of server push in flask framework
+Example of server push in flask framework
 
 
-##Reference
+##References
 
 * Long Polling: 
   * Jonathan Eunice [lpoll](https://bitbucket.org/jeunice/lpoll)
