@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
+    </head>
+    <body>
+        <div id="container">
+            <textarea disabled id="chatroom" style="height:300px; max-height:300px; width:600px"></textarea><br />
+            <input id="name" style="width:130px" value="ws" />
+            <input id="words" style="width:460px" />
+        </div>
+        <script type="text/javascript"> 
+
+            var min = {{timestamp}};
+            var namespace = '/test';
+
+            function send_data() {
+                var name = document.getElementById('name');
+                var words = document.getElementById('words');
+                if (name.value != '' && words.value != '') {
+                    data = {}
+                    data.name = encodeURIComponent(name.value);
+                    data.words = encodeURIComponent(words.value);
+                    
+                    xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/publish', true);
+                    xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+                    xhr.send('name=' + data.name + '&words=' + data.words);
+                    words.value = ''
+                }
+            }
+
+            (function() {
+                var words = document.getElementById('words');
+                words.onkeypress = function(e) { if (e.keyCode == 13) send_data();} 
+
+                var socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
+                socket.on('connect', function() {
+                    socket.emit('waiting_for_update', {'min': min});
+                    });
+                socket.on('update', function(message) {
+                    var chatroom = document.getElementById('chatroom');
+                    response = JSON.parse(message);
+                    min = response.timestamp;
+                    chatroom.innerHTML += response.data;
+                    chatroom.scrollTop = chatroom.scrollHeight;
+                    socket.emit('waiting_for_update', {'min': min});
+                    });
+
+            })();
+
+        </script>
+    </body>
+</html>
